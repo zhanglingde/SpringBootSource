@@ -34,6 +34,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
+ * @EnableAutoConfiguration 的主要功能是启动 Spring 应用程序上下文时进行自动配置，它 会尝试猜测并配置项目可能需要的 Bean。
+ * 自动配置通常是基于项目 classpath 中引入的类 和已定义的 Bean 来实现的。在此过程中，被自动配置的组件来自项目自身和项目依赖的 jar 包中
+ *
+ * 自定义了配置使用自定义的配置，没有自定义配置，使用 jar 包中的默认配置
+ *
  * Enable auto-configuration of the Spring Application Context, attempting to guess and
  * configure beans that you are likely to need. Auto-configuration classes are usually
  * applied based on your classpath and what beans you have defined. For example, if you
@@ -80,18 +85,26 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 @Documented
 @Inherited
 @AutoConfigurationPackage
+// 自动配置功能的核心实现者
 @Import(AutoConfigurationImportSelector.class)
 public @interface EnableAutoConfiguration {
 
+    /**
+     * 用来表示配置开启/关闭自动配置的功能
+     */
 	String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
 
 	/**
+     * 根据类排除指定的自动配置
+     *
 	 * Exclude specific auto-configuration classes such that they will never be applied.
 	 * @return the classes to exclude
 	 */
 	Class<?>[] exclude() default {};
 
 	/**
+     * 根据类名排除指定的自动配置
+     *
 	 * Exclude specific auto-configuration class names such that they will never be
 	 * applied.
 	 * @return the class names to exclude

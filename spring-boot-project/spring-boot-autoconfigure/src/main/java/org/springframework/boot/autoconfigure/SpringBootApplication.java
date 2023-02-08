@@ -52,12 +52,15 @@ import org.springframework.data.repository.Repository;
 @Documented
 @Inherited
 @SpringBootConfiguration
+// 开启自动配置，扫描各个 jar 包下的 spring.factories 文件，并加载文件中注册的 AutoConfiguration 类等
 @EnableAutoConfiguration
 @ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
 		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
 public @interface SpringBootApplication {
 
 	/**
+     * 排除指定自动配置类
+     *
 	 * Exclude specific auto-configuration classes such that they will never be applied.
 	 * @return the classes to exclude
 	 */
@@ -65,6 +68,8 @@ public @interface SpringBootApplication {
 	Class<?>[] exclude() default {};
 
 	/**
+     * 排除指定自动配置类名
+     *
 	 * Exclude specific auto-configuration class names such that they will never be
 	 * applied.
 	 * @return the class names to exclude
@@ -74,6 +79,8 @@ public @interface SpringBootApplication {
 	String[] excludeName() default {};
 
 	/**
+     * 指定扫描的基础包，激活注解组件的初始化
+     *
 	 * Base packages to scan for annotated components. Use {@link #scanBasePackageClasses}
 	 * for a type-safe alternative to String-based package names.
 	 * <p>
@@ -89,6 +96,8 @@ public @interface SpringBootApplication {
 	String[] scanBasePackages() default {};
 
 	/**
+     * 指定扫描的类，用于初始化
+     *
 	 * Type-safe alternative to {@link #scanBasePackages} for specifying the packages to
 	 * scan for annotated components. The package of each class specified will be scanned.
 	 * <p>
@@ -107,6 +116,9 @@ public @interface SpringBootApplication {
 	Class<?>[] scanBasePackageClasses() default {};
 
 	/**
+     * 指定是否代理 @Bean 方法以强制执行 bean 的生命周期行为；
+     * 此功能 需要通过运行时生成 CGLIB 子类来实现方法拦截。该子类有一定的限制，比如配置类及其 方法不允许声明为 final 等。
+     *
 	 * Specify whether {@link Bean @Bean} methods should get proxied in order to enforce
 	 * bean lifecycle behavior, e.g. to return shared singleton bean instances even in
 	 * case of direct {@code @Bean} method calls in user code. This feature requires
