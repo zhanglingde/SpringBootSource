@@ -177,7 +177,9 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		WebServer webServer = this.webServer;
 		ServletContext servletContext = getServletContext();
 		if (webServer == null && servletContext == null) {
+            // 创建 ServletWebServer 的工厂
 			ServletWebServerFactory factory = getWebServerFactory();
+            // 创建嵌入式 Servlet 容器
 			this.webServer = factory.getWebServer(getSelfInitializer());
 		}
 		else if (servletContext != null) {
@@ -199,6 +201,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	 */
 	protected ServletWebServerFactory getWebServerFactory() {
 		// Use bean names so that we don't consider the hierarchy
+        // 获取类型为 ServletWebServerFactory 的 Bean
 		String[] beanNames = getBeanFactory().getBeanNamesForType(ServletWebServerFactory.class);
 		if (beanNames.length == 0) {
 			throw new ApplicationContextException("Unable to start ServletWebServerApplicationContext due to missing "
@@ -373,6 +376,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 
 		public ExistingWebApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
+            // SCOPES：request/session 作用范围
 			for (String scopeName : SCOPES) {
 				Scope scope = beanFactory.getRegisteredScope(scopeName);
 				if (scope != null) {
