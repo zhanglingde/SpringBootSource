@@ -144,9 +144,10 @@ class AutoConfigurationSorter {
 		}
 
 		Set<String> getClassesRequestedAfter(String className) {
-            // 当前类要在哪些类之后执行
+            // 当前类：获取在哪些类之后执行，就是获取 @AutoConfigureAfter 注解指定的类
 			Set<String> classesRequestedAfter = new LinkedHashSet<>(get(className).getAfter());
-            // 哪些类之前执行的类包含当前类
+            // 其他类：哪些类需要在当前类之前执行，
+            // 注意区别 @AutoConfigureBefore 的意义：当前类需要在哪些类之前执行
 			this.classes.forEach((name, autoConfigurationClass) -> {
 				if (autoConfigurationClass.getBefore().contains(className)) {
 					classesRequestedAfter.add(name);
@@ -208,14 +209,13 @@ class AutoConfigurationSorter {
 		}
 
 		private int getOrder() {
-            // 判断 META-INF/spring-autoconfigure-metadata.properties 文件中是否配置类型
+            // 判断 META-INF/spring-autoconfigure-metadata.properties 文件中是否存在当前 className
 			if (wasProcessed()) {
-                // 如果配置了，就使用文件中配置的顺序，获取不到就使用默认顺序
+                // 如果存在，就使用文件中指定的顺序，否则就使用默认顺序
 				return this.autoConfigurationMetadata.getInteger(this.className, "AutoConfigureOrder",
 						AutoConfigureOrder.DEFAULT_ORDER);
 			}
-            // 如果 META-INF/spring-autoconfigure-metadata.properties 文件中未配置，就使用
-            // @AutoConfigureOrder 的值
+            // 处理不存在的情况：获取 @AutoConfigureOrder 注解指定的顺序
 			Map<String, Object> attributes = getAnnotationMetadata()
 					.getAnnotationAttributes(AutoConfigureOrder.class.getName());
             // 如果 @AutoConfigureOrder 未配置，就使用默认顺序

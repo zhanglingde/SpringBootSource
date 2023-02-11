@@ -67,6 +67,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnClass(DispatcherServlet.class)
+// 需要在 ServletWebServerFactoryAutoConfiguration 自动装配完成后处理
 @AutoConfigureAfter(ServletWebServerFactoryAutoConfiguration.class)
 public class DispatcherServletAutoConfiguration {
 
@@ -142,6 +143,9 @@ public class DispatcherServletAutoConfiguration {
 	@Order(Ordered.LOWEST_PRECEDENCE - 10)
 	private static class DefaultDispatcherServletCondition extends SpringBootCondition {
 
+        /**
+         * 处理装配条件. 判断当前 beanFactory 是否包含 dispatcherServlet.
+         */
 		@Override
 		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			ConditionMessage.Builder message = ConditionMessage.forCondition("Default DispatcherServlet");
@@ -169,6 +173,9 @@ public class DispatcherServletAutoConfiguration {
 	@Order(Ordered.LOWEST_PRECEDENCE - 10)
 	private static class DispatcherServletRegistrationCondition extends SpringBootCondition {
 
+        /**
+         * 处理装配条件. 判断当前 beanFactory 是否包含 dispatcherServletRegistration.
+         */
 		@Override
 		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();

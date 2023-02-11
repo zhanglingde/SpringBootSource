@@ -172,6 +172,7 @@ public class WebMvcAutoConfiguration {
 	// Defined as a nested config to ensure WebMvcConfigurer is not read when not
 	// on the classpath
 	@Configuration(proxyBeanMethods = false)
+    // 引入了 EnableWebMvcConfiguration
 	@Import(EnableWebMvcConfiguration.class)
 	@EnableConfigurationProperties({ WebMvcProperties.class, ResourceProperties.class })
 	@Order(0)
@@ -199,6 +200,9 @@ public class WebMvcAutoConfiguration {
 			this.resourceHandlerRegistrationCustomizer = resourceHandlerRegistrationCustomizerProvider.getIfAvailable();
 		}
 
+        /**
+         * http 消息转换器.
+         */
 		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			this.messageConvertersProvider
@@ -239,6 +243,10 @@ public class WebMvcAutoConfiguration {
 			mediaTypes.forEach(configurer::mediaType);
 		}
 
+        /**
+         * 视图解析器.
+         * @return 返回默认的神力解析器.
+         */
 		@Bean
 		@ConditionalOnMissingBean
 		public InternalResourceViewResolver defaultViewResolver() {
@@ -269,6 +277,10 @@ public class WebMvcAutoConfiguration {
 			return resolver;
 		}
 
+        /**
+         * 引入国际化配置.
+         * @return 返回国际化配置.
+         */
 		@Bean
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(prefix = "spring.mvc", name = "locale")
@@ -296,6 +308,9 @@ public class WebMvcAutoConfiguration {
 			ApplicationConversionService.addBeans(registry, this.beanFactory);
 		}
 
+        /**
+         * 静态资源映射.
+         */
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			if (!this.resourceProperties.isAddMappings()) {

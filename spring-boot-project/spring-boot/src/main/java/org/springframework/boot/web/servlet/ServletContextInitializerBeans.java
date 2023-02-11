@@ -93,6 +93,7 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 
 	private void addServletContextInitializerBeans(ListableBeanFactory beanFactory) {
 		for (Class<? extends ServletContextInitializer> initializerType : this.initializerTypes) {
+            // 获取 ServletContextInitializer: getOrderedBeansOfType(beanFactory,initializerType)
 			for (Entry<String, ? extends ServletContextInitializer> initializerBean : getOrderedBeansOfType(beanFactory,
 					initializerType)) {
 				addServletContextInitializerBean(initializerBean.getKey(), initializerBean.getValue(), beanFactory);
@@ -102,23 +103,28 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 
 	private void addServletContextInitializerBean(String beanName, ServletContextInitializer initializer,
 			ListableBeanFactory beanFactory) {
+        // 添加 ServletRegistrationBean
 		if (initializer instanceof ServletRegistrationBean) {
 			Servlet source = ((ServletRegistrationBean<?>) initializer).getServlet();
 			addServletContextInitializerBean(Servlet.class, beanName, initializer, beanFactory, source);
 		}
+        // 添加 FilterRegistrationBean
 		else if (initializer instanceof FilterRegistrationBean) {
 			Filter source = ((FilterRegistrationBean<?>) initializer).getFilter();
 			addServletContextInitializerBean(Filter.class, beanName, initializer, beanFactory, source);
 		}
+        // 添加 DelegatingFilterProxyRegistrationBean
 		else if (initializer instanceof DelegatingFilterProxyRegistrationBean) {
 			String source = ((DelegatingFilterProxyRegistrationBean) initializer).getTargetBeanName();
 			addServletContextInitializerBean(Filter.class, beanName, initializer, beanFactory, source);
 		}
+        // 添加 ServletListenerRegistrationBean
 		else if (initializer instanceof ServletListenerRegistrationBean) {
 			EventListener source = ((ServletListenerRegistrationBean<?>) initializer).getListener();
 			addServletContextInitializerBean(EventListener.class, beanName, initializer, beanFactory, source);
 		}
 		else {
+            // 其他的 ServletContextInitializer Bean
 			addServletContextInitializerBean(ServletContextInitializer.class, beanName, initializer, beanFactory,
 					initializer);
 		}
@@ -208,6 +214,7 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 		Map<String, T> map = new LinkedHashMap<>();
 		for (String name : names) {
 			if (!excludes.contains(name) && !ScopedProxyUtils.isScopedTarget(name)) {
+                // 在这里实例化
 				T bean = beanFactory.getBean(name, type);
 				if (!excludes.contains(bean)) {
 					map.put(name, bean);

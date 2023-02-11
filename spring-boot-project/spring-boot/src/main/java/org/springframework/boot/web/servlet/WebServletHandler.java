@@ -42,10 +42,12 @@ class WebServletHandler extends ServletComponentHandler {
 	@Override
 	public void doHandle(Map<String, Object> attributes, ScannedGenericBeanDefinition beanDefinition,
 			BeanDefinitionRegistry registry) {
+        // 注册的是 ServletRegistrationBean 对应的 BeanDefinition
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ServletRegistrationBean.class);
 		builder.addPropertyValue("asyncSupported", attributes.get("asyncSupported"));
 		builder.addPropertyValue("initParameters", extractInitParameters(attributes));
 		builder.addPropertyValue("loadOnStartup", attributes.get("loadOnStartup"));
+        // 获取 servlet 名称，如果指定了名称，就使用指定名称，如果没有指定，就使用是bean的名称
 		String name = determineName(attributes, beanDefinition);
 		builder.addPropertyValue("name", name);
 		builder.addPropertyValue("servlet", beanDefinition);

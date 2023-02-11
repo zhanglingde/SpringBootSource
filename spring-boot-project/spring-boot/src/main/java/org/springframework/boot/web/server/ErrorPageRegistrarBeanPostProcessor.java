@@ -65,6 +65,7 @@ public class ErrorPageRegistrarBeanPostProcessor implements BeanPostProcessor, B
 
 	private void postProcessBeforeInitialization(ErrorPageRegistry registry) {
 		for (ErrorPageRegistrar registrar : getRegistrars()) {
+            // 处理注册操作
 			registrar.registerErrorPages(registry);
 		}
 	}

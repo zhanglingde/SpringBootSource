@@ -44,9 +44,11 @@ class ServletComponentScanRegistrar implements ImportBeanDefinitionRegistrar {
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		Set<String> packagesToScan = getPackagesToScan(importingClassMetadata);
 		if (registry.containsBeanDefinition(BEAN_NAME)) {
+            // 只是更新了扫描的包
 			updatePostProcessor(registry, packagesToScan);
 		}
 		else {
+            // 添加了一个 BeanFactoryPostProcessor
 			addPostProcessor(registry, packagesToScan);
 		}
 	}
@@ -62,9 +64,12 @@ class ServletComponentScanRegistrar implements ImportBeanDefinitionRegistrar {
 
 	private void addPostProcessor(BeanDefinitionRegistry registry, Set<String> packagesToScan) {
 		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+        // ServletComponentRegisteringPostProcessor: 处理扫描的 BeanFactoryPostProcessor
 		beanDefinition.setBeanClass(ServletComponentRegisteringPostProcessor.class);
 		beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(packagesToScan);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        // ServletComponentScanRegistrar 的整个功能，就是为了注册
+        // ServletComponentRegisteringPostProcessor
 		registry.registerBeanDefinition(BEAN_NAME, beanDefinition);
 	}
 

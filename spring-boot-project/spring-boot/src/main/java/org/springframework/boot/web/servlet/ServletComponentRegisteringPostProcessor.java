@@ -52,6 +52,9 @@ class ServletComponentRegisteringPostProcessor implements BeanFactoryPostProcess
 		HANDLERS = Collections.unmodifiableList(servletComponentHandlers);
 	}
 
+    /**
+     * 需要扫描的包.
+     */
 	private final Set<String> packagesToScan;
 
 	private ApplicationContext applicationContext;
@@ -62,9 +65,11 @@ class ServletComponentRegisteringPostProcessor implements BeanFactoryPostProcess
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        // 判断是否运行在内嵌的 web 容器中
 		if (isRunningInEmbeddedWebServer()) {
 			ClassPathScanningCandidateComponentProvider componentProvider = createComponentProvider();
 			for (String packageToScan : this.packagesToScan) {
+                // 进行包扫描操作
 				scanPackage(componentProvider, packageToScan);
 			}
 		}
@@ -92,6 +97,7 @@ class ServletComponentRegisteringPostProcessor implements BeanFactoryPostProcess
 		componentProvider.setEnvironment(this.applicationContext.getEnvironment());
 		componentProvider.setResourceLoader(this.applicationContext);
 		for (ServletComponentHandler handler : HANDLERS) {
+            // 配置过滤规则
 			componentProvider.addIncludeFilter(handler.getTypeFilter());
 		}
 		return componentProvider;

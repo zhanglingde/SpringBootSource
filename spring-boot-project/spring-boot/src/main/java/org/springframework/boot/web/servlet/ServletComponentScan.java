@@ -47,6 +47,7 @@ import org.springframework.core.annotation.AliasFor;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+// 引入了一个类，这个类会再引入一些东西，用来处理扫描
 @Import(ServletComponentScanRegistrar.class)
 public @interface ServletComponentScan {
 
