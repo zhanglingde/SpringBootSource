@@ -56,6 +56,7 @@ class OnExpressionCondition extends SpringBootCondition {
 		if (resolver == null) {
 			resolver = new StandardBeanExpressionResolver();
 		}
+        // 在这里解析表达式的值
 		BeanExpressionContext expressionContext = new BeanExpressionContext(beanFactory, null);
 		Object result = resolver.evaluate(expression, expressionContext);
 		return (result != null && (boolean) result);

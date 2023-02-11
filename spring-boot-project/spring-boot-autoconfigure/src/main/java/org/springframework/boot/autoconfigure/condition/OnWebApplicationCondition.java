@@ -55,6 +55,7 @@ class OnWebApplicationCondition extends FilteringSpringBootCondition {
 		for (int i = 0; i < outcomes.length; i++) {
 			String autoConfigurationClass = autoConfigurationClasses[i];
 			if (autoConfigurationClass != null) {
+                // 处理结果
 				outcomes[i] = getOutcome(
 						autoConfigurationMetadata.get(autoConfigurationClass, "ConditionalOnWebApplication"));
 			}
@@ -87,6 +88,7 @@ class OnWebApplicationCondition extends FilteringSpringBootCondition {
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		boolean required = metadata.isAnnotated(ConditionalOnWebApplication.class.getName());
+        // 这里判断是否为 web 应用
 		ConditionOutcome outcome = isWebApplication(context, metadata, required);
 		if (required && !outcome.isMatch()) {
 			return ConditionOutcome.noMatch(outcome.getConditionMessage());
@@ -99,6 +101,7 @@ class OnWebApplicationCondition extends FilteringSpringBootCondition {
 
 	private ConditionOutcome isWebApplication(ConditionContext context, AnnotatedTypeMetadata metadata,
 			boolean required) {
+        // 判断方式也非常简单，直接使用应用类型来判断
 		switch (deduceType(metadata)) {
 		case SERVLET:
 			return isServletWebApplication(context);

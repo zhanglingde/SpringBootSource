@@ -47,11 +47,13 @@ class OnPropertyCondition extends SpringBootCondition {
 
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        // 获取 @ConditionalOnProperty 的属性值
 		List<AnnotationAttributes> allAnnotationAttributes = annotationAttributesFromMultiValueMap(
 				metadata.getAllAnnotationAttributes(ConditionalOnProperty.class.getName()));
 		List<ConditionMessage> noMatch = new ArrayList<>();
 		List<ConditionMessage> match = new ArrayList<>();
 		for (AnnotationAttributes annotationAttributes : allAnnotationAttributes) {
+            // 在 determineOutcome(...) 方法中进行判断，注意参数：context.getEnvironment()
 			ConditionOutcome outcome = determineOutcome(annotationAttributes, context.getEnvironment());
 			(outcome.isMatch() ? match : noMatch).add(outcome.getConditionMessage());
 		}
@@ -136,6 +138,8 @@ class OnPropertyCondition extends SpringBootCondition {
 		private void collectProperties(PropertyResolver resolver, List<String> missing, List<String> nonMatching) {
 			for (String name : this.names) {
 				String key = this.prefix + name;
+                // resolver 传入的 environment
+                // properties 条件判断就是判断 environment 里有没有相应属性
 				if (resolver.containsProperty(key)) {
 					if (!isMatch(resolver.getProperty(key), this.havingValue)) {
 						nonMatching.add(name);

@@ -89,6 +89,7 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 		}
 		List<String> matches = new ArrayList<>(classNames.size());
 		for (String candidate : classNames) {
+            // 进行条件匹配
 			if (classNameFilter.matches(candidate, classLoader)) {
 				matches.add(candidate);
 			}
@@ -138,6 +139,7 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 				classLoader = ClassUtils.getDefaultClassLoader();
 			}
 			try {
+                // 通过异常捕获来判断是否存在该 class
 				resolve(className, classLoader);
 				return true;
 			}

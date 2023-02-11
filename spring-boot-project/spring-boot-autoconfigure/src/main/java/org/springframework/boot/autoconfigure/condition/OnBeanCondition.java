@@ -114,9 +114,12 @@ class OnBeanCondition extends FilteringSpringBootCondition implements Configurat
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		ConditionMessage matchMessage = ConditionMessage.empty();
 		MergedAnnotations annotations = metadata.getAnnotations();
+        // 处理 @ConditionalOnBean
 		if (annotations.isPresent(ConditionalOnBean.class)) {
 			Spec<ConditionalOnBean> spec = new Spec<>(context, metadata, annotations, ConditionalOnBean.class);
+            // 处理匹配
 			MatchResult matchResult = getMatchingBeans(context, spec);
+            // 注意判断条件
 			if (!matchResult.isAllMatched()) {
 				String reason = createOnBeanNoMatchReason(matchResult);
 				return ConditionOutcome.noMatch(spec.message().because(reason));
@@ -124,9 +127,12 @@ class OnBeanCondition extends FilteringSpringBootCondition implements Configurat
 			matchMessage = spec.message(matchMessage).found("bean", "beans").items(Style.QUOTE,
 					matchResult.getNamesOfAllMatches());
 		}
+        // 处理 @ConditionalOnSingleCandidate
 		if (metadata.isAnnotated(ConditionalOnSingleCandidate.class.getName())) {
 			Spec<ConditionalOnSingleCandidate> spec = new SingleCandidateSpec(context, metadata, annotations);
+            // 处理匹配
 			MatchResult matchResult = getMatchingBeans(context, spec);
+            // 注意判断条件
 			if (!matchResult.isAllMatched()) {
 				return ConditionOutcome.noMatch(spec.message().didNotFind("any beans").atAll());
 			}
@@ -138,10 +144,13 @@ class OnBeanCondition extends FilteringSpringBootCondition implements Configurat
 			matchMessage = spec.message(matchMessage).found("a primary bean from beans").items(Style.QUOTE,
 					matchResult.getNamesOfAllMatches());
 		}
+        // 处理 @ConditionalOnMissingBean
 		if (metadata.isAnnotated(ConditionalOnMissingBean.class.getName())) {
 			Spec<ConditionalOnMissingBean> spec = new Spec<>(context, metadata, annotations,
 					ConditionalOnMissingBean.class);
+            // 处理匹配
 			MatchResult matchResult = getMatchingBeans(context, spec);
+            // 注意判断条件
 			if (matchResult.isAnyMatched()) {
 				String reason = createOnMissingBeanNoMatchReason(matchResult);
 				return ConditionOutcome.noMatch(spec.message().because(reason));
@@ -163,8 +172,10 @@ class OnBeanCondition extends FilteringSpringBootCondition implements Configurat
 			beanFactory = (ConfigurableListableBeanFactory) parent;
 		}
 		MatchResult result = new MatchResult();
+        // 获取 ignoreType，只有 @ConditionalOnMissingBean 有这个属性
 		Set<String> beansIgnoredByType = getNamesOfBeansIgnoredByType(classLoader, beanFactory, considerHierarchy,
 				spec.getIgnoredTypes(), parameterizedContainers);
+        // 处理 types
 		for (String type : spec.getTypes()) {
 			Collection<String> typeMatches = getBeanNamesForType(classLoader, considerHierarchy, beanFactory, type,
 					parameterizedContainers);
@@ -176,6 +187,7 @@ class OnBeanCondition extends FilteringSpringBootCondition implements Configurat
 				result.recordMatchedType(type, typeMatches);
 			}
 		}
+        // 处理类上的注解 @ConditionalOnMissingBean 有这个属性
 		for (String annotation : spec.getAnnotations()) {
 			Set<String> annotationMatches = getBeanNamesForAnnotation(classLoader, beanFactory, annotation,
 					considerHierarchy);
@@ -187,6 +199,7 @@ class OnBeanCondition extends FilteringSpringBootCondition implements Configurat
 				result.recordMatchedAnnotation(annotation, annotationMatches);
 			}
 		}
+        // 处理 beanName
 		for (String beanName : spec.getNames()) {
 			if (!beansIgnoredByType.contains(beanName) && containsBean(beanFactory, beanName, considerHierarchy)) {
 				result.recordMatchedName(beanName);
@@ -232,6 +245,7 @@ class OnBeanCondition extends FilteringSpringBootCondition implements Configurat
 		result = addAll(result, beanFactory.getBeanNamesForType(type, true, false));
 		for (Class<?> container : parameterizedContainers) {
 			ResolvableType generic = ResolvableType.forClassWithGenerics(container, type);
+            // 从 beanFactory 中获取存在的 beanName
 			result = addAll(result, beanFactory.getBeanNamesForType(generic, true, false));
 		}
 		if (considerHierarchy && beanFactory instanceof HierarchicalBeanFactory) {

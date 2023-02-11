@@ -53,7 +53,9 @@ class OnResourceCondition extends SpringBootCondition {
 				"@ConditionalOnResource annotations must specify at least one resource location");
 		List<String> missing = new ArrayList<>();
 		for (String location : locations) {
+            // location 中可能有占位符，在这里处理
 			String resource = context.getEnvironment().resolvePlaceholders(location);
+            // 判断 resource 是否存在
 			if (!loader.getResource(resource).exists()) {
 				missing.add(location);
 			}
