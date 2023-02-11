@@ -86,6 +86,12 @@ public class DispatcherServletAutoConfiguration {
 	@EnableConfigurationProperties({ HttpProperties.class, WebMvcProperties.class })
 	protected static class DispatcherServletConfiguration {
 
+        /**
+         * DispatchServlet 的自动装配
+         * @param httpProperties
+         * @param webMvcProperties
+         * @return
+         */
 		@Bean(name = DEFAULT_DISPATCHER_SERVLET_BEAN_NAME)
 		public DispatcherServlet dispatcherServlet(HttpProperties httpProperties, WebMvcProperties webMvcProperties) {
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
@@ -97,6 +103,11 @@ public class DispatcherServletAutoConfiguration {
 			return dispatcherServlet;
 		}
 
+        /**
+         * 文件上传组件自动装配
+         * @param resolver
+         * @return
+         */
 		@Bean
 		@ConditionalOnBean(MultipartResolver.class)
 		@ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)

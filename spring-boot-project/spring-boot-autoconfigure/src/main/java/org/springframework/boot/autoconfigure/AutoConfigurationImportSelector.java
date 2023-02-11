@@ -119,17 +119,24 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	 */
 	protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,
 			AnnotationMetadata annotationMetadata) {
+        // 又一次判断是否开启自动装配
 		if (!isEnabled(annotationMetadata)) {
 			return EMPTY_ENTRY;
 		}
+        // 获取注解的属性
 		AnnotationAttributes attributes = getAttributes(annotationMetadata);
         // 通过 SpringFactoriesLoader 类提供的方法加载类路径中 META-INF 目录下的 spring.factories 文件中针对 EnableAutoConfiguration 的注册配置类
 		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+        // 去重，转换成set，再转换成list
 		configurations = removeDuplicates(configurations);
+        // 获取的排除的类，其实就是处理 @EnableAutoConfiguration 的 exclude 与 excludeName
 		Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+        // 检查排除的类是否合法，再移除需要排除的配置类
 		checkExcludedClasses(configurations, exclusions);
 		configurations.removeAll(exclusions);
+        // 过滤一些不需要自动装配的类，不过这个方法并没有过滤成功
 		configurations = filter(configurations, autoConfigurationMetadata);
+        // 触发 AutoConfigurationImportEvent 事件
 		fireAutoConfigurationImportEvents(configurations, exclusions);
 		return new AutoConfigurationEntry(configurations, exclusions);
 	}
@@ -179,6 +186,7 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	 * @return a list of candidate configurations
 	 */
 	protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+        // SPI机制加载自动配置类，getSpringFactoriesLoaderFactoryClass() 返回的是 EnableAutoConfiguration
 		List<String> configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
 				getBeanClassLoader());
 		Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you "
@@ -198,11 +206,13 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	private void checkExcludedClasses(List<String> configurations, Set<String> exclusions) {
 		List<String> invalidExcludes = new ArrayList<>(exclusions.size());
 		for (String exclusion : exclusions) {
+            // ClassLoader 中加载了exclusion类，但自动配置的类中不包括该类，就会加入到 invalidExcludes 集合中
 			if (ClassUtils.isPresent(exclusion, getClass().getClassLoader()) && !configurations.contains(exclusion)) {
 				invalidExcludes.add(exclusion);
 			}
 		}
 		if (!invalidExcludes.isEmpty()) {
+            // 这里会抛出异常
 			handleInvalidExcludes(invalidExcludes);
 		}
 	}
@@ -252,6 +262,7 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 		String[] candidates = StringUtils.toStringArray(configurations);
 		boolean[] skip = new boolean[candidates.length];
 		boolean skipped = false;
+        // getAutoConfigurationImportFilters()：加载配置文件中的 AutoConfigurationImportFilter
 		for (AutoConfigurationImportFilter filter : getAutoConfigurationImportFilters()) {
 			invokeAwareMethods(filter);
 			boolean[] match = filter.match(candidates, autoConfigurationMetadata);

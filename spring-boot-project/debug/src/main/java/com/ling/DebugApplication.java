@@ -1,4 +1,4 @@
-package com.ling.test01;
+package com.ling;
 
 import com.ling.test01.config.AnimalImportSelector;
 import org.springframework.boot.SpringApplication;

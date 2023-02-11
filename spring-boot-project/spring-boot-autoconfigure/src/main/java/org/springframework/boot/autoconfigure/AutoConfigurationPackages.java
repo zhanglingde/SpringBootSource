@@ -92,7 +92,9 @@ public abstract class AutoConfigurationPackages {
 	public static void register(BeanDefinitionRegistry registry, String... packageNames) {
 		if (registry.containsBeanDefinition(BEAN)) {
 			BeanDefinition beanDefinition = registry.getBeanDefinition(BEAN);
+            // bean 是 BasePackages，构造方法是 BasePackages(String... names)，这里获取原本的构造参数的值
 			ConstructorArgumentValues constructorArguments = beanDefinition.getConstructorArgumentValues();
+            // 将原本的构造参数值，以及传入的 packageNames 统一添加到构造方法的第0个参数值上
 			constructorArguments.addIndexedArgumentValue(0, addBasePackages(constructorArguments, packageNames));
 		}
 		else {

@@ -135,6 +135,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnClass({ Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class })
+// //如果没有自定义WebMvc的配置类，则使用本配置
 @ConditionalOnMissingBean(WebMvcConfigurationSupport.class)
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)
 @AutoConfigureAfter({ DispatcherServletAutoConfiguration.class, TaskExecutionAutoConfiguration.class,
@@ -308,9 +309,11 @@ public class WebMvcAutoConfiguration {
 						.addResourceLocations("classpath:/META-INF/resources/webjars/")
 						.setCachePeriod(getSeconds(cachePeriod)).setCacheControl(cacheControl));
 			}
+            // 映射静态资源路径
 			String staticPathPattern = this.mvcProperties.getStaticPathPattern();
 			if (!registry.hasMappingForPattern(staticPathPattern)) {
 				customizeResourceHandlerRegistration(registry.addResourceHandler(staticPathPattern)
+                        // staticLocations 默认为 classpath:[/META-INF/resources/, /resources/, /static/, /public/]
 						.addResourceLocations(getResourceLocations(this.resourceProperties.getStaticLocations()))
 						.setCachePeriod(getSeconds(cachePeriod)).setCacheControl(cacheControl));
 			}

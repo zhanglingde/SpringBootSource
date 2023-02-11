@@ -33,6 +33,10 @@ import org.springframework.util.StringUtils;
  */
 final class AutoConfigurationMetadataLoader {
 
+    /**
+     * 这个文件在源码中并不存在，应该是在运行时写入的
+     * @see org.springframework.boot.autoconfigureprocessor.AutoConfigureAnnotationProcessor
+     */
 	protected static final String PATH = "META-INF/spring-autoconfigure-metadata.properties";
 
 	private AutoConfigurationMetadataLoader() {
