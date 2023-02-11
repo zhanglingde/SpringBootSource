@@ -268,9 +268,13 @@ public class SpringApplication {
 		this.resourceLoader = resourceLoader;
 		Assert.notNull(primarySources, "PrimarySources must not be null");
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+        // web 应用类型，REACTIVE，NONE，SERVLET
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
+        // 设置初始化器，getSpringFactoriesInstances：从 META-INF/spring.factories 中获取配置
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
+        // 设置监听器，getSpringFactoriesInstances：从 META-INF/spring.factories 中获取配置
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+        // 返回包含main()方法的class
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
 
@@ -300,25 +304,35 @@ public class SpringApplication {
 		stopWatch.start();
 		ConfigurableApplicationContext context = null;
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
+        // 配置一个系统属性：java.awt.headless
 		configureHeadlessProperty();
+        // 获取监听器，并启动
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		listeners.starting();
 		try {
+            // 封装传入的参数
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+            // 处理环境参数
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
 			configureIgnoreBeanInfo(environment);
+            // 输出 banner
 			Banner printedBanner = printBanner(environment);
+            // 创建 applicationContext
 			context = createApplicationContext();
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
+            // 准备上下文设置一系列的属性
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
+            // 调用 AbstractApplicationContext.refresh，启动 spring 容器
 			refreshContext(context);
 			afterRefresh(context, applicationArguments);
 			stopWatch.stop();
 			if (this.logStartupInfo) {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
 			}
+            // 发布事件
 			listeners.started(context);
+            // 调用 runner(实现 ApplicationRunner 或 CommandLineRunner 接口的类)
 			callRunners(context, applicationArguments);
 		}
 		catch (Throwable ex) {
@@ -367,6 +381,7 @@ public class SpringApplication {
 			SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
 		context.setEnvironment(environment);
 		postProcessApplicationContext(context);
+        // 应用 Initializer 进行初始化操作
 		applyInitializers(context);
 		listeners.contextPrepared(context);
 		if (this.logStartupInfo) {
@@ -374,12 +389,14 @@ public class SpringApplication {
 			logStartupProfileInfo(context);
 		}
 		// Add boot specific singleton beans
+        // 获取 beanFactory
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		beanFactory.registerSingleton("springApplicationArguments", applicationArguments);
 		if (printedBanner != null) {
 			beanFactory.registerSingleton("springBootBanner", printedBanner);
 		}
 		if (beanFactory instanceof DefaultListableBeanFactory) {
+            // 是否允许bean的信息被覆盖
 			((DefaultListableBeanFactory) beanFactory)
 					.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
@@ -387,9 +404,12 @@ public class SpringApplication {
 			context.addBeanFactoryPostProcessor(new LazyInitializationBeanFactoryPostProcessor());
 		}
 		// Load the sources
+        // 获取所有资源
 		Set<Object> sources = getAllSources();
 		Assert.notEmpty(sources, "Sources must not be empty");
+        // 加载 class
 		load(context, sources.toArray(new Object[0]));
+        // 发布事件
 		listeners.contextLoaded(context);
 	}
 
@@ -571,6 +591,7 @@ public class SpringApplication {
 			try {
 				switch (this.webApplicationType) {
 				case SERVLET:
+                    // 使用的是 AnnotationConfigServletWebServerApplicationContext
 					contextClass = Class.forName(DEFAULT_SERVLET_WEB_CONTEXT_CLASS);
 					break;
 				case REACTIVE:

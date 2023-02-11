@@ -154,6 +154,7 @@ class BeanDefinitionLoader {
 			load(loader);
 		}
 		if (isComponent(source)) {
+            // 有 @Component 注解，生成 BeanDefinition 对象，注册到 Spring 容器中
 			this.annotatedReader.register(source);
 			return 1;
 		}
