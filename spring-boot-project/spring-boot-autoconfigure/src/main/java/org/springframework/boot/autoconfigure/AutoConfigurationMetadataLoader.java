@@ -34,7 +34,8 @@ import org.springframework.util.StringUtils;
 final class AutoConfigurationMetadataLoader {
 
     /**
-     * 这个文件在源码中并不存在，应该是在运行时写入的
+     * 这个文件在源码中并不存在，是在编译其写入的. 生成的文件位于：
+     * spring-boot-project/spring-boot-autoconfigure/target/classes/META-INF/spring-autoconfigure-metadata.properties.
      * @see org.springframework.boot.autoconfigureprocessor.AutoConfigureAnnotationProcessor
      */
 	protected static final String PATH = "META-INF/spring-autoconfigure-metadata.properties";
@@ -48,12 +49,15 @@ final class AutoConfigurationMetadataLoader {
 
 	static AutoConfigurationMetadata loadMetadata(ClassLoader classLoader, String path) {
 		try {
+            // 从 PATH 中加载数据
 			Enumeration<URL> urls = (classLoader != null) ? classLoader.getResources(path)
 					: ClassLoader.getSystemResources(path);
+            // 将文件中加载到的内容，保存到了 properties 中
 			Properties properties = new Properties();
 			while (urls.hasMoreElements()) {
 				properties.putAll(PropertiesLoaderUtils.loadProperties(new UrlResource(urls.nextElement())));
 			}
+            // 将 Properties 包装为 AutoConfigurationMetadata
 			return loadMetadata(properties);
 		}
 		catch (IOException ex) {
@@ -76,6 +80,12 @@ final class AutoConfigurationMetadataLoader {
 			this.properties = properties;
 		}
 
+        /**
+         * META-INF/spring-autoconfigure-metadata.properties 中的内容最终会加载到 properties 中，这个方法
+         * 就是判断 properties 是否包含该 className 的配置.
+         * @param className the source class.
+         * @return ture：存在，false：不存在.
+         */
 		@Override
 		public boolean wasProcessed(String className) {
 			return this.properties.containsKey(className);

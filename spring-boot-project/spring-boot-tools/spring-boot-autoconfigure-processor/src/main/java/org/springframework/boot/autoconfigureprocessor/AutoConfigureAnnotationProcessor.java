@@ -47,6 +47,16 @@ import javax.tools.StandardLocation;
  * Annotation processor to store certain annotations from auto-configuration classes in a
  * property file.
  *
+ * 将自动装配类的条件写入到 META-INF/spring-autoconfigure-metadata.properties 中，写入时机是在编译期， 估计是为了加快
+ * springboot 的启动速度.
+ *
+ * AbstractProcessor：jdk 提供的注解处理类，其实现类上的 `@SupportedAnnotationTypes` 注解指定了当前实现
+ * 支持的注解类型，在当前模块下的
+ * src/main/resources/META-INF/services/javax.annotation.processing.Processor
+ * 文件中，包含当前类的全限定名：
+ * org.springframework.boot.autoconfigureprocessor.AutoConfigureAnnotationProcessor
+ *
+ * 使用这种方式达到编译期运行的目的.
  * @author Madhura Bhave
  * @author Phillip Webb
  * @since 1.5.0
@@ -70,6 +80,7 @@ public class AutoConfigureAnnotationProcessor extends AbstractProcessor {
 
 	public AutoConfigureAnnotationProcessor() {
 		Map<String, String> annotations = new LinkedHashMap<>();
+        // 准备 注解 与 具体包名.类名 的映射
 		addAnnotations(annotations);
 		this.annotations = Collections.unmodifiableMap(annotations);
 		Map<String, ValueExtractor> valueExtractors = new LinkedHashMap<>();

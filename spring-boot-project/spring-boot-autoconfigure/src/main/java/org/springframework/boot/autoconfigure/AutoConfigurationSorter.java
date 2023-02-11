@@ -53,6 +53,7 @@ class AutoConfigurationSorter {
 	}
 
 	List<String> getInPriorityOrder(Collection<String> classNames) {
+        // 将 classNames 包装成 AutoConfigurationClasses
 		AutoConfigurationClasses classes = new AutoConfigurationClasses(this.metadataReaderFactory,
 				this.autoConfigurationMetadata, classNames);
 		List<String> orderedClassNames = new ArrayList<>(classNames);
@@ -77,6 +78,7 @@ class AutoConfigurationSorter {
 		while (!toSort.isEmpty()) {
 			doSortByAfterAnnotation(classes, toSort, sorted, processing, null);
 		}
+        // 存在于集合 sorted 中，但不存在于 classNames 中的元素将会被移除
 		sorted.retainAll(classNames);
 		return new ArrayList<>(sorted);
 	}
@@ -86,15 +88,18 @@ class AutoConfigurationSorter {
 		if (current == null) {
 			current = toSort.remove(0);
 		}
+        // 使用 processing 来判断是否循环比较
 		processing.add(current);
 		for (String after : classes.getClassesRequestedAfter(current)) {
 			Assert.state(!processing.contains(after),
 					"AutoConfigure cycle detected between " + current + " and " + after);
 			if (!sorted.contains(after) && toSort.contains(after)) {
+                // 递归调用
 				doSortByAfterAnnotation(classes, toSort, sorted, processing, after);
 			}
 		}
 		processing.remove(current);
+        // 添加到已排序结果中
 		sorted.add(current);
 	}
 
@@ -117,11 +122,14 @@ class AutoConfigurationSorter {
 				if (!this.classes.containsKey(className)) {
 					AutoConfigurationClass autoConfigurationClass = new AutoConfigurationClass(className,
 							metadataReaderFactory, autoConfigurationMetadata);
+                    // 判断类是否存在
 					boolean available = autoConfigurationClass.isAvailable();
+                    // @AutoConfigureBefore 与 @AutoConfigureAfter 标记的类的 required 为 false
 					if (required || available) {
 						this.classes.put(className, autoConfigurationClass);
 					}
 					if (available) {
+                        // 递归调用
 						addToClasses(metadataReaderFactory, autoConfigurationMetadata,
 								autoConfigurationClass.getBefore(), false);
 						addToClasses(metadataReaderFactory, autoConfigurationMetadata,
@@ -136,7 +144,9 @@ class AutoConfigurationSorter {
 		}
 
 		Set<String> getClassesRequestedAfter(String className) {
+            // 当前类要在哪些类之后执行
 			Set<String> classesRequestedAfter = new LinkedHashSet<>(get(className).getAfter());
+            // 哪些类之前执行的类包含当前类
 			this.classes.forEach((name, autoConfigurationClass) -> {
 				if (autoConfigurationClass.getBefore().contains(className)) {
 					classesRequestedAfter.add(name);
@@ -171,6 +181,7 @@ class AutoConfigurationSorter {
 		boolean isAvailable() {
 			try {
 				if (!wasProcessed()) {
+                    // 获取className对应的.class文件，不抛出异常就说明.class文件存在
 					getAnnotationMetadata();
 				}
 				return true;
@@ -197,17 +208,24 @@ class AutoConfigurationSorter {
 		}
 
 		private int getOrder() {
+            // 判断 META-INF/spring-autoconfigure-metadata.properties 文件中是否配置类型
 			if (wasProcessed()) {
+                // 如果配置了，就使用文件中配置的顺序，获取不到就使用默认顺序
 				return this.autoConfigurationMetadata.getInteger(this.className, "AutoConfigureOrder",
 						AutoConfigureOrder.DEFAULT_ORDER);
 			}
+            // 如果 META-INF/spring-autoconfigure-metadata.properties 文件中未配置，就使用
+            // @AutoConfigureOrder 的值
 			Map<String, Object> attributes = getAnnotationMetadata()
 					.getAnnotationAttributes(AutoConfigureOrder.class.getName());
+            // 如果 @AutoConfigureOrder 未配置，就使用默认顺序
 			return (attributes != null) ? (Integer) attributes.get("value") : AutoConfigureOrder.DEFAULT_ORDER;
 		}
 
 		private boolean wasProcessed() {
 			return (this.autoConfigurationMetadata != null
+                    // 判断 META-INF/spring-autoconfigure-metadata.properties
+                    // 文件中是否存在该 className 的配置
 					&& this.autoConfigurationMetadata.wasProcessed(this.className));
 		}
 
