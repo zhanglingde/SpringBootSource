@@ -65,6 +65,8 @@ public @interface SpringBootConfiguration {
 	 * individually like when declared on non-{@code @Configuration} classes, a.k.a.
 	 * "@Bean Lite Mode" (see {@link Bean @Bean's javadoc}). It is therefore behaviorally
 	 * equivalent to removing the {@code @Configuration} stereotype.
+     *
+     * 被标记的 Bean 是否进行 cglib 代理
 	 * @return whether to proxy {@code @Bean} methods
 	 * @since 2.2
 	 */
