@@ -84,6 +84,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
+// 注册一个 Bean，保存了当前注解标注的类所在包路径
 @AutoConfigurationPackage
 // 自动配置功能的核心实现者
 @Import(AutoConfigurationImportSelector.class)

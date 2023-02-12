@@ -49,15 +49,15 @@ final class AutoConfigurationMetadataLoader {
 
 	static AutoConfigurationMetadata loadMetadata(ClassLoader classLoader, String path) {
 		try {
-            // 从 PATH 中加载数据
+			// 1. 获取所有 `META-INF/spring-autoconfigure-metadata.properties` 文件 URL
 			Enumeration<URL> urls = (classLoader != null) ? classLoader.getResources(path)
 					: ClassLoader.getSystemResources(path);
-            // 将文件中加载到的内容，保存到了 properties 中
+			// 2. 加载这些文件并将他们的属性添加到 Properties 中
 			Properties properties = new Properties();
 			while (urls.hasMoreElements()) {
 				properties.putAll(PropertiesLoaderUtils.loadProperties(new UrlResource(urls.nextElement())));
 			}
-            // 将 Properties 包装为 AutoConfigurationMetadata
+			// 3. 将这个 Properties 封装到 PropertiesAutoConfigurationMetadata 对象中并返回
 			return loadMetadata(properties);
 		}
 		catch (IOException ex) {

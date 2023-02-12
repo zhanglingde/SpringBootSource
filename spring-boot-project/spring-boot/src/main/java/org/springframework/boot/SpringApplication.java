@@ -316,7 +316,7 @@ public class SpringApplication {
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
             // 处理环境参数
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
-            // 如果有配置 spring.beaninfo.ignore，则将该配置设置进系统参数
+            // 如果有配置 spring.beaner.info.ignore，则将该配置设置进系统参数
 			configureIgnoreBeanInfo(environment);
             // 输出 banner
 			Banner printedBanner = printBanner(environment);
