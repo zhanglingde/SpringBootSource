@@ -35,6 +35,10 @@ class SpringApplicationRunListeners {
 
 	private final Log log;
 
+	/**
+	 * 封装的所有 SpringApplicationRunListener
+	 * Spring Boot 在 META-INF/spring.factories 只配置 {@link EventPublishingRunListener} 监听器
+	 */
 	private final List<SpringApplicationRunListener> listeners;
 
 	SpringApplicationRunListeners(Log log, Collection<? extends SpringApplicationRunListener> listeners) {
