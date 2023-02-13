@@ -529,7 +529,7 @@ public class SpringApplication {
 				System.getProperty(SYSTEM_PROPERTY_JAVA_AWT_HEADLESS, Boolean.toString(this.headless)));
 	}
 
-	private  getRunListeners(String[] args) {
+	private SpringApplicationRunListeners getRunListeners(String[] args) {
 		// 指定实例化对象所使用的构造器的入参类型
 		Class<?>[] types = new Class<?>[] { SpringApplication.class, String[].class };
 		// 通过类加载器从 `META-INF/spring.factories` 文件中获取 SpringApplicationRunListener 类型的类名称，并进行实例化

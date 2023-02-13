@@ -53,6 +53,7 @@ class SpringApplicationRunListeners {
 	}
 
 	void environmentPrepared(ConfigurableEnvironment environment) {
+        // 只有一个 EventPublishingRunListener 对象
 		for (SpringApplicationRunListener listener : this.listeners) {
 			listener.environmentPrepared(environment);
 		}
