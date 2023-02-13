@@ -45,11 +45,14 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 
 	@Override
 	public boolean[] match(String[] autoConfigurationClasses, AutoConfigurationMetadata autoConfigurationMetadata) {
+        // <1> 从 Spring 应用上下文中获取 ConditionEvaluationReport 对象
 		ConditionEvaluationReport report = ConditionEvaluationReport.find(this.beanFactory);
-        // 得到匹配的结果
+        // <2> 获取所有自动配置类的匹配结果，空方法，交由子类实现
 		ConditionOutcome[] outcomes = getOutcomes(autoConfigurationClasses, autoConfigurationMetadata);
+        // <3> 将自动配置类的匹配结果保存至一个 `boolean[]` 数组中，并将匹配结果一一保存至 ConditionEvaluationReport 中
 		boolean[] match = new boolean[outcomes.length];
 		for (int i = 0; i < outcomes.length; i++) {
+            // 注意这里匹配结果为空也表示匹配成功
 			match[i] = (outcomes[i] == null || outcomes[i].isMatch());
 			if (!match[i] && outcomes[i] != null) {
 				logOutcome(autoConfigurationClasses[i], outcomes[i]);
@@ -58,6 +61,7 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 				}
 			}
 		}
+        // <4> 返回所有自动配置类是否满足条件的结果数组
 		return match;
 	}
 
@@ -84,9 +88,11 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 
 	protected final List<String> filter(Collection<String> classNames, ClassNameFilter classNameFilter,
 			ClassLoader classLoader) {
+        // 如果为空，则返回空结果
 		if (CollectionUtils.isEmpty(classNames)) {
 			return Collections.emptyList();
 		}
+        // 使用 `classNameFilter` 对 `classNames` 进行过滤
 		List<String> matches = new ArrayList<>(classNames.size());
 		for (String candidate : classNames) {
             // 进行条件匹配
@@ -94,6 +100,7 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 				matches.add(candidate);
 			}
 		}
+        // 返回匹配成功的 `className` 们
 		return matches;
 	}
 
@@ -114,6 +121,7 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 
 	protected enum ClassNameFilter {
 
+        /** 指定类存在 */
 		PRESENT {
 
 			@Override
@@ -123,6 +131,7 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 
 		},
 
+        /** 指定类不存在 */
 		MISSING {
 
 			@Override
@@ -139,11 +148,12 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 				classLoader = ClassUtils.getDefaultClassLoader();
 			}
 			try {
-                // 通过异常捕获来判断是否存在该 class
+                // 加载指定类，加载成功表示存在这个类
 				resolve(className, classLoader);
 				return true;
 			}
 			catch (Throwable ex) {
+                // 加载失败表示不存在这个类
 				return false;
 			}
 		}
