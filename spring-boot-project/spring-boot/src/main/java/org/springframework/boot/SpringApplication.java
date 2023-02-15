@@ -379,7 +379,7 @@ public class SpringApplication {
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
             // 6. 准备好当前应用 Environment 环境，这里会加载出所有的配置信息，包括 `application.yaml` 和外部的属性配置
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
-            // 如果有配置 spring.beaner.info.ignore，则将该配置设置进系统参数
+            // 如果有配置 spring.beaninfo.ignore，则将该配置设置进系统参数
 			configureIgnoreBeanInfo(environment);
             // 7. 打印 banner 内容
 			Banner printedBanner = printBanner(environment);
