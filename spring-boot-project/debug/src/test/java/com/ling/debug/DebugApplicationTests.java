@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.ling.condition.Person;
+import com.ling.profileconfig.Student;
 import org.junit.jupiter.api.Test;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Marker;
@@ -26,13 +27,21 @@ class DebugApplicationTests {
     Person person2;
     @Resource(name = "person3")
     Person person3;
+    @Resource
+    Student student;
 
 
     @Test
     void contextLoads() {
-        System.out.println("person = " + person1);
+        System.out.println("person1 = " + person1);
         System.out.println("person2 = " + person2);
         System.out.println("person3 = " + person3);
+    }
+
+    // 配置文件加载
+    @Test
+    void profileConfig(){
+        System.out.println("student = " + student);
     }
 
 }

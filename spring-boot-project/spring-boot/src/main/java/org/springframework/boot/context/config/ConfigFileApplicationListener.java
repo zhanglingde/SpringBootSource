@@ -649,7 +649,7 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 				}
                 // <7> 将需要的 Document 们进行倒序，因为配置在后面优先级越高，所以需要反转一下
 				Collections.reverse(loaded);
-                // <8> 如果有需要的 Documen
+                // <8> 如果有需要的 Document
 				if (!loaded.isEmpty()) {
                     /**
                      * 借助 Lambda 表达式调用 {@link #addToLoaded} 方法
