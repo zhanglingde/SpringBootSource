@@ -63,10 +63,10 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Brian Clozel
  * @since 2.0.0
  */
-@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
-@Configuration(proxyBeanMethods = false)
-@ConditionalOnWebApplication(type = Type.SERVLET)
-@ConditionalOnClass(DispatcherServlet.class)
+@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)		// 最高优先级的自动配置
+@Configuration(proxyBeanMethods = false)		// 作为一个配置类，不进行 CGLIB 提升
+@ConditionalOnWebApplication(type = Type.SERVLET)	// Servlet 应用的类型才注入当前 Bean
+@ConditionalOnClass(DispatcherServlet.class)		// 存在 DispatcherServlet 这个类才注入当前 Bean
 // 需要在 ServletWebServerFactoryAutoConfiguration 自动装配完成后处理
 @AutoConfigureAfter(ServletWebServerFactoryAutoConfiguration.class)
 public class DispatcherServletAutoConfiguration {

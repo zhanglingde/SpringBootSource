@@ -45,11 +45,11 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 
 	@Override
 	public boolean[] match(String[] autoConfigurationClasses, AutoConfigurationMetadata autoConfigurationMetadata) {
-        // <1> 从 Spring 应用上下文中获取 ConditionEvaluationReport 对象
+        // 1. 从 Spring 应用上下文中获取 ConditionEvaluationReport 对象
 		ConditionEvaluationReport report = ConditionEvaluationReport.find(this.beanFactory);
-        // <2> 获取所有自动配置类的匹配结果，空方法，交由子类实现
+        // 2. 获取所有自动配置类的匹配结果，空方法，交由子类实现
 		ConditionOutcome[] outcomes = getOutcomes(autoConfigurationClasses, autoConfigurationMetadata);
-        // <3> 将自动配置类的匹配结果保存至一个 `boolean[]` 数组中，并将匹配结果一一保存至 ConditionEvaluationReport 中
+        // 3. 将自动配置类的匹配结果保存至一个 `boolean[]` 数组中，并将匹配结果一一保存至 ConditionEvaluationReport 中
 		boolean[] match = new boolean[outcomes.length];
 		for (int i = 0; i < outcomes.length; i++) {
             // 注意这里匹配结果为空也表示匹配成功
@@ -61,7 +61,7 @@ abstract class FilteringSpringBootCondition extends SpringBootCondition
 				}
 			}
 		}
-        // <4> 返回所有自动配置类是否满足条件的结果数组
+        // 4. 返回所有自动配置类是否满足条件的结果数组
 		return match;
 	}
 

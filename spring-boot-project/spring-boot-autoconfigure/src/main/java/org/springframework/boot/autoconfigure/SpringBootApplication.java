@@ -50,10 +50,9 @@ import org.springframework.data.repository.Repository;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Inherited
-@SpringBootConfiguration
-// 开启自动配置，扫描各个 jar 包下的 spring.factories 文件，并加载文件中注册的 AutoConfiguration 类等
-@EnableAutoConfiguration
+@Inherited  // 表明该注解定义在某个类上时，其子类会继承该注解
+@SpringBootConfiguration  // 继承 @Configuration
+@EnableAutoConfiguration  // 开启自动配置，扫描各个 jar 包下的 spring.factories 文件，并加载文件中注册的 AutoConfiguration 类等
 @ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
 		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
 public @interface SpringBootApplication {

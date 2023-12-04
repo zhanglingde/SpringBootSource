@@ -139,7 +139,7 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
 		// 4. 对所有的自动配置类进行去重
 		configurations = removeDuplicates(configurations);
-		// <5> 获取需要排除的自动配置类
+		// 5. 获取需要排除的自动配置类
 		// 可通过 `@EnableAutoConfiguration` 注解的 `exclude` 和 `excludeName` 配置
 		// 也可以通过 `spring.autoconfigure.exclude` 配置
 		Set<String> exclusions = getExclusions(annotationMetadata, attributes);

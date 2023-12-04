@@ -187,15 +187,15 @@ public class ConfigFileApplicationListener implements EnvironmentPostProcessor, 
 	}
 
 	private void onApplicationEnvironmentPreparedEvent(ApplicationEnvironmentPreparedEvent event) {
-        // <1> 通过类加载器从 `META-INF/spring.factories` 文件中获取 EnvironmentPostProcessor 类型的类名称，并进行实例化
+        // 1. 通过类加载器从 `META-INF/spring.factories` 文件中获取 EnvironmentPostProcessor 类型的类名称，并进行实例化
 		List<EnvironmentPostProcessor> postProcessors = loadPostProcessors();
-        // <2> 当前对象也是 EnvironmentPostProcessor 实现类，添加进去
+        // 2. 当前对象也是 EnvironmentPostProcessor 实现类，添加进去
 		postProcessors.add(this);
-        // <3> 将这些 EnvironmentPostProcessor 进行排序
+        // 3. 将这些 EnvironmentPostProcessor 进行排序
 		AnnotationAwareOrderComparator.sort(postProcessors);
-        // <4> 遍历这些 EnvironmentPostProcessor 依次对 Environment 进行处理
+        // 4. 遍历这些 EnvironmentPostProcessor 依次对 Environment 进行处理
 		for (EnvironmentPostProcessor postProcessor : postProcessors) {
-            // <4.1> 依次对当前 Environment 进行处理，上面第 `2` 步添加了当前对象，我们直接看到当前类的这个方法
+            // 4.1 依次对当前 Environment 进行处理，上面第 `2` 步添加了当前对象，我们直接看到当前类的这个方法
 			postProcessor.postProcessEnvironment(event.getEnvironment(), event.getSpringApplication());
 		}
 	}

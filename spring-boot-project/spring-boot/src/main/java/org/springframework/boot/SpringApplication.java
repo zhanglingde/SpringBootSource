@@ -430,28 +430,28 @@ public class SpringApplication {
 	private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners,
 			ApplicationArguments applicationArguments) {
 		// Create and configure the environment
-		// <1> 根据 Web 应用的类型创建一个 StandardEnvironment 对象 `environment`
+		// 1. 根据 Web 应用的类型创建一个 StandardEnvironment 对象 `environment`
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
-		// <2> 为 `environment` 配置默认属性（如果有）并设置需要激活的 `profile` 们
+		// 2. 为 `environment` 配置默认属性（如果有）并设置需要激活的 `profile` 们
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
-		// <3> 将当前 `environment` 的 MutablePropertySources 封装成 SpringConfigurationPropertySources 添加到 MutablePropertySources 首部
+		// 3. 将当前 `environment` 的 MutablePropertySources 封装成 SpringConfigurationPropertySources 添加到 MutablePropertySources 首部
 		ConfigurationPropertySources.attach(environment);
 		/**
-		 * <4> 对所有的 SpringApplicationRunListener 广播 ApplicationEvent 应用环境已准备好的事件，这一步比较复杂
+		 * 4. 对所有的 SpringApplicationRunListener 广播 ApplicationEvent 应用环境已准备好的事件，这一步比较复杂
 		 * 例如 Spring Cloud 的 BootstrapApplicationListener 监听到该事件会创建一个 ApplicationContext 作为当前 Spring 应用上下文的父容器，同时会读取 `bootstrap.yml` 文件的信息
 		 * {@link ConfigFileApplicationListener} 监听到该事件然后去解析 `application.yml` 等应用配置文件的配置信息
 		 */
 		listeners.environmentPrepared(environment);
-        // <5> 将 `environment` 绑定到当前 SpringApplication 上
+        // 5. 将 `environment` 绑定到当前 SpringApplication 上
 		bindToSpringApplication(environment);
-		// <6> 如果不是自定义的 Environment 则需要根据 Web 应用类型转换成对应 Environment 类型
+		// 6. 如果不是自定义的 Environment 则需要根据 Web 应用类型转换成对应 Environment 类型
 		if (!this.isCustomEnvironment) {
 			environment = new EnvironmentConverter(getClassLoader()).convertEnvironmentIfNecessary(environment,
 					deduceEnvironmentClass());
 		}
-		// <7> 再次进行上面第 `3` 步的处理过程，防止上面几步对上面的 PropertySources 有修改
+		// 7. 再次进行上面第 `3` 步的处理过程，防止上面几步对上面的 PropertySources 有修改
 		ConfigurationPropertySources.attach(environment);
-		// <8> 返回准备好的 `environment`
+		// 8. 返回准备好的 `environment`
 		return environment;
 	}
 
@@ -468,22 +468,22 @@ public class SpringApplication {
 
 	private void prepareContext(ConfigurableApplicationContext context, ConfigurableEnvironment environment,
 			SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
-		// <1> 为 Spring 应用上下文设置 Environment 环境
+		// 1. 为 Spring 应用上下文设置 Environment 环境
 		context.setEnvironment(environment);
-		// <2> 将一些工具 Bean 设置到 Spring 应用上下文中，供使用
+		// 2. 将一些工具 Bean 设置到 Spring 应用上下文中，供使用
 		postProcessApplicationContext(context);
-		// <3> 通知 ApplicationContextInitializer 对 Spring 应用上下文进行初始化工作
+		// 3. 通知 ApplicationContextInitializer 对 Spring 应用上下文进行初始化工作
 		// 参考 SpringApplication 构造方法
 		applyInitializers(context);
         // （在创建和准备ApplicationContext之后，但在加载之前）
-		// <4> 对所有 SpringApplicationRunListener 进行广播，发布 ApplicationContextInitializedEvent 初始化事件
+		// 4. 对所有 SpringApplicationRunListener 进行广播，发布 ApplicationContextInitializedEvent 初始化事件
 		listeners.contextPrepared(context);
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
 			logStartupProfileInfo(context);
 		}
 		// Add boot specific singleton beans
-		// <5> 向应用上下文注册 `main(String[])` 方法的参数 Bean 和 Banner 对象
+		// 5. 向应用上下文注册 `main(String[])` 方法的参数 Bean 和 Banner 对象
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		beanFactory.registerSingleton("springApplicationArguments", applicationArguments);
 		if (printedBanner != null) {
@@ -499,12 +499,12 @@ public class SpringApplication {
 			context.addBeanFactoryPostProcessor(new LazyInitializationBeanFactoryPostProcessor());
 		}
 		// Load the sources
-		// <6> 获取 `primarySources`（例如你的启动类）和 `sources`（例如 Spring Cloud 中的 @BootstrapConfiguration）源对象
+		// 6. 获取 `primarySources`（例如你的启动类）和 `sources`（例如 Spring Cloud 中的 @BootstrapConfiguration）源对象
 		Set<Object> sources = getAllSources();
 		Assert.notEmpty(sources, "Sources must not be empty");
-		// <7> 将上面的源对象加载成 BeanDefinition 并注册
+		// 7. 将上面的源对象加载成 BeanDefinition 并注册
 		load(context, sources.toArray(new Object[0]));
-		// <8> 对所有的 SpringApplicationRunListener 广播 ApplicationPreparedEvent 应用已准备事件
+		// 8. 对所有的 SpringApplicationRunListener 广播 ApplicationPreparedEvent 应用已准备事件
 		// 会把 ApplicationListener 添加至 Spring 应用上下文中
 		listeners.contextLoaded(context);
 	}
