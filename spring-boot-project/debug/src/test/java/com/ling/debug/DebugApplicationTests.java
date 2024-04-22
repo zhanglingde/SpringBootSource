@@ -14,9 +14,12 @@ import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 @SpringBootTest
 class DebugApplicationTests {
@@ -29,6 +32,9 @@ class DebugApplicationTests {
     Person person3;
     @Resource
     Student student;
+
+	@Autowired
+	ConversionService conversionService;
 
 
     @Test
@@ -43,5 +49,11 @@ class DebugApplicationTests {
     void profileConfig(){
         System.out.println("student = " + student);
     }
+
+	@Test
+	public void test001(){
+		ArrayList convert = conversionService.convert("a,1,2,3,b,c", ArrayList.class);
+		System.out.println();
+	}
 
 }

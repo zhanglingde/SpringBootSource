@@ -148,9 +148,15 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 
 	@Override
 	protected void onRefresh() {
+		// 调用父类方法，初始化 ThemeSource 对象
 		super.onRefresh();
 		try {
-            // 创建 web 服务器，如 tomcat,jetty 等
+			/**
+			 * 创建一个 WebServer 服务（默认 Tomcat\其他 jetty 等），并初始化 ServletContext 上下文
+			 * 会先创建一个 {@link Tomcat} 容器并启动，同时会注册各种 Servlet
+			 * 例如 借助 {@link org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration}
+			 * 注册 {@link DispatcherServlet} 对象到 ServletContext 上下文，这样就可以通过 Spring MVC 的核心组件来实现一个 Web 应用
+			 */
 			createWebServer();
 		}
 		catch (Throwable ex) {
@@ -160,7 +166,12 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 
 	@Override
 	protected void finishRefresh() {
+		// 调用父类方法，会发布 ContextRefreshedEvent 上下文刷新事件
 		super.finishRefresh();
+		/**
+		 * 启动上面 {@link #onRefresh }创建的 WebServer，上面仅启动 {@link Tomcat} 容器，Servlet 添加到了 ServletContext 上下文中
+		 * 这里启动 {@link TomcatWebServer} 容器对象，对每一个 TomcatEmbeddedContext 中的 Servlet 进行加载并初始化
+		 */
 		WebServer webServer = startWebServer();
 		if (webServer != null) {
 			publishEvent(new ServletWebServerInitializedEvent(webServer, this));
@@ -174,26 +185,43 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	}
 
 	private void createWebServer() {
+		// 1. 获取当前 `WebServer` 容器对象，首次进来为空
 		WebServer webServer = this.webServer;
 		ServletContext servletContext = getServletContext();
+		// 2. 如果 WebServer 和 ServletContext 都为空，则需要创建一个（使用 Spring Boot 内嵌 Tomcat 容器则会进入该分支）
 		if (webServer == null && servletContext == null) {
-            // 创建 ServletWebServer 的工厂
+            // 2.1 获取 Servlet 容器工厂对象（默认为 Tomcat）`factory`
 			ServletWebServerFactory factory = getWebServerFactory();
-            // 创建嵌入式 Servlet 容器
+            // 通过工厂创建嵌入式 Servlet 容器
+			/**
+			 * <3.2> 先创建一个 {@link ServletContextInitializer} Servlet 上下文初始器，实现也就是当前类的 {@link this#selfInitialize(ServletContext)} 方法
+			 * 至于为什么不用 Servlet 3.0 新增的 {@link javax.servlet.ServletContainerInitializer} 这个类，我在
+			 * [精尽Spring MVC源码分析 - 寻找遗失的 web.xml](https://www.cnblogs.com/lifullmoon/p/14122704.html)有提到过
+			 *
+			 * <3.3> 从 `factory` 工厂中创建一个 WebServer 容器对象
+			 * 例如创建一个 {@link TomcatWebServer} 容器对象，并初始化 `ServletContext` 上下文，创建 {@link Tomcat} 容器并启动
+			 * 启动过程异步触发了 {@link org.springframework.boot.web.embedded.tomcat.TomcatStarter#onStartup} 方法
+			 * 也就会调用这个传入的 {@link ServletContextInitializer} 的 {@link #selfInitialize(ServletContext)} 方法
+			 */
 			this.webServer = factory.getWebServer(getSelfInitializer());
 		}
+		// 3. 否则，如果 ServletContext 不为空，说明使用了外部的 Servlet 容器（例如 Tomcat）
 		else if (servletContext != null) {
 			try {
+				// 3.1 那么这里主动调用 {@link this#selfInitialize(ServletContext)} 方法来注册各种 Servlet、Filter
 				getSelfInitializer().onStartup(servletContext);
 			}
 			catch (ServletException ex) {
 				throw new ApplicationContextException("Cannot initialize servlet context", ex);
 			}
 		}
+		// 4. 将 ServletContext 的一些初始化参数关联到当前 Spring 应用的 Environment 环境中
 		initPropertySources();
 	}
 
 	/**
+	 * 获取 Servlet 容器工厂对象
+	 *
 	 * Returns the {@link ServletWebServerFactory} that should be used to create the
 	 * embedded {@link WebServer}. By default this method searches for a suitable bean in
 	 * the context itself.
@@ -201,7 +229,9 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	 */
 	protected ServletWebServerFactory getWebServerFactory() {
 		// Use bean names so that we don't consider the hierarchy
-        // 获取类型为 ServletWebServerFactory 的 Bean
+		// 获取当前 BeanFactory 中类型为 ServletWebServerFactory 的 Bean 的名称，不考虑层次性
+		// 必须存在一个，否则抛出异常
+		// 所以想要切换 Servlet 容器得引入对应的 Starter 模块并排除 `spring-boot-starter-web` 中默认的 `tomcat` Starter 模块
 		String[] beanNames = getBeanFactory().getBeanNamesForType(ServletWebServerFactory.class);
 		if (beanNames.length == 0) {
 			throw new ApplicationContextException("Unable to start ServletWebServerApplicationContext due to missing "
@@ -211,6 +241,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 			throw new ApplicationContextException("Unable to start ServletWebServerApplicationContext due to multiple "
 					+ "ServletWebServerFactory beans : " + StringUtils.arrayToCommaDelimitedString(beanNames));
 		}
+		// 获取这个 ServletWebServerFactory 对象
 		return getBeanFactory().getBean(beanNames[0], ServletWebServerFactory.class);
 	}
 
@@ -225,9 +256,20 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	}
 
 	private void selfInitialize(ServletContext servletContext) throws ServletException {
+		// 1. 将当前 Spring 应用上下文设置到 ServletContext 上下文的属性中
+		// 同时将 ServletContext 上下文设置到 Spring 应用上下文中
 		prepareWebApplicationContext(servletContext);
+		// 2. 向 Spring 应用上下文注册一个 ServletContextScope 对象（ServletContext 的封装）
 		registerApplicationScope(servletContext);
+		// 3. 向 Spring 应用上下文注册 `contextParameters` 和 `contextAttributes` 属性（会先被封装成 Map）
 		WebApplicationContextUtils.registerEnvironmentBeans(getBeanFactory(), servletContext);
+		/**
+		 * 4. 【重点】先从 Spring 应用上下文找到所有的 {@link ServletContextInitializer}
+		 * 也就会找到各种 {@link RegistrationBean}，然后依次调用他们的 `onStartup` 方法，向 ServletContext 上下文注册 Servlet、Filter 和 EventListener
+		 * 例如 {@link DispatcherServletAutoConfiguration} 中的 {@link DispatcherServletRegistrationBean} 就会注册 {@link DispatcherServlet} 对象
+		 * 这也就是我们熟知的 Spring MVC 的核心组件，关于它可参考我的 [精尽Spring MVC源码分析 - 文章导读](https://www.cnblogs.com/lifullmoon/p/14123963.html) 文章
+		 * 所以这里执行完了，也就启动了 Tomcat，同时注册了所有的 Servlet，那么 Web 应用准备就绪了
+		 */
 		for (ServletContextInitializer beans : getServletContextInitializerBeans()) {
 			beans.onStartup(servletContext);
 		}

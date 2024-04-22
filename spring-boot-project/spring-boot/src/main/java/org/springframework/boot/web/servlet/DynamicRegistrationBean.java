@@ -111,7 +111,7 @@ public abstract class DynamicRegistrationBean<D extends Registration.Dynamic> ex
 			logger.info(StringUtils.capitalize(description) + " was not registered (possibly already registered?)");
 			return;
 		}
-        // 处理配置
+		// 设置初始化参数，也就是设置 `Map<String, String> initParameters` 参数
 		configure(registration);
 	}
 

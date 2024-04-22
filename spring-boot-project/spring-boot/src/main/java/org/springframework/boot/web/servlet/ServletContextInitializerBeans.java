@@ -67,27 +67,47 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 
 	/**
 	 * Seen bean instances or bean names.
+	 * 所有的 Servlet or Filter or EventListener or ServletContextInitializer 对象
+	 * 也可能是该对象对应的 `beanName`
 	 */
 	private final Set<Object> seen = new HashSet<>();
 
+	/**
+	 * 保存不同类型的 ServletContextInitializer 对象
+	 * key：Servlet or Filter or EventListener or ServletContextInitializer
+	 * value：ServletContextInitializer 实现类
+	 */
 	private final MultiValueMap<Class<?>, ServletContextInitializer> initializers;
 
+	/**
+	 * 指定 ServletContextInitializer 的类型，默认就是它
+	 */
 	private final List<Class<? extends ServletContextInitializer>> initializerTypes;
 
+	/**
+	 * 排序后的所有 `initializers` 中的 ServletContextInitializer 实现类（不可被修改）
+	 */
 	private List<ServletContextInitializer> sortedList;
 
 	@SafeVarargs
 	public ServletContextInitializerBeans(ListableBeanFactory beanFactory,
 			Class<? extends ServletContextInitializer>... initializerTypes) {
 		this.initializers = new LinkedMultiValueMap<>();
+		// 1. 设置类型为 `ServletContextInitializer`
 		this.initializerTypes = (initializerTypes.length != 0) ? Arrays.asList(initializerTypes)
 				: Collections.singletonList(ServletContextInitializer.class);
+		// 2. 找到 IoC 容器中所有 `ServletContextInitializer` 类型的 Bean
+		// 并将这些信息添加到 `seen` 和 `initializers` 集合中
 		addServletContextInitializerBeans(beanFactory);
+		// 3. 从 IoC 容器中获取 Servlet or Filter or EventListener 类型的 Bean
+		// 适配成 RegistrationBean 对象，并添加到 `initializers` 和 `seen` 集合中
 		addAdaptableBeans(beanFactory);
+		// 4. 将 `initializers` 中的所有 ServletContextInitializer 进行排序，并保存至 `sortedList` 集合中
 		List<ServletContextInitializer> sortedInitializers = this.initializers.values().stream()
 				.flatMap((value) -> value.stream().sorted(AnnotationAwareOrderComparator.INSTANCE))
 				.collect(Collectors.toList());
 		this.sortedList = Collections.unmodifiableList(sortedInitializers);
+		// 5. DEBUG 模式下打印日志
 		logMappings(this.initializers);
 	}
 
